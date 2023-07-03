@@ -46,8 +46,13 @@ public class motorMotor {
 		double r = Math.sqrt(l*l + z*z);
 		double c= Math.cos(elbowAngle/180*Math.PI);
 		double an= c  * upperArmLen;
+<<<<<<< HEAD
 //		System.out.println("cos(elbowangle): " + c);
 //		System.out.println("an: " + an);
+=======
+		//System.out.println("cos(elbowangle): " + c);
+		//System.out.println("an: " + an);
+>>>>>>> branch 'markusBranche' of https://github.com/phoenix-error/MegArm.git
 
 		double beta = Math.acos((lowerArmLen+an)/r)*(180/Math.PI);
 		double shoulderAngle = beta + gamma;
@@ -236,7 +241,11 @@ public class motorMotor {
 		elbow = new EV3LargeRegulatedMotor(MotorPort.C);
 		gripper = new EV3MediumRegulatedMotor(MotorPort.D);
 		base.setSpeed(90);
+<<<<<<< HEAD
 //		debugPrint(shoulder.getSpeed());				//die Funktion wäre gut
+=======
+		//debugPrint(shoulder.getSpeed());				die Funktion wäre gut
+>>>>>>> branch 'markusBranche' of https://github.com/phoenix-error/MegArm.git
 		String [] header = {"quit",
 							"btn2jointControl",
 							"btn2xyzControl",
