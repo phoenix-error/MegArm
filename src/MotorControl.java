@@ -7,13 +7,13 @@ import lejos.utility.Delay;
 import java.lang.Math;
 import lejos.hardware.lcd.LCD;
 
-public class MotorControl {
+public class motorMotor {
 	public static EV3LargeRegulatedMotor base;
 	public static EV3LargeRegulatedMotor shoulder;
 	public static EV3LargeRegulatedMotor elbow;
 	public static EV3MediumRegulatedMotor gripper;
-	public static double upperArmLen = 0;
-	public static double lowerArmLen = 0;
+	public static double upperArmLen = 19;
+	public static double lowerArmLen = 17.5;
 	public static double shoulderGearRatio = 125;
 	public static double elbowGearRatio = 25;
 	public static boolean open = false;
@@ -45,16 +45,18 @@ public class MotorControl {
 		double r = Math.sqrt(l*l + z*z);
 		double c= Math.cos(elbowAngle/180*Math.PI);
 		double an= c  * upperArmLen;
-		System.out.println("cos(elbowangle): " + c);
-		System.out.println("an: " + an);
+//		System.out.println("cos(elbowangle): " + c);
+//		System.out.println("an: " + an);
 
 		double beta = Math.acos((lowerArmLen+an)/r)*(180/Math.PI);
 		double shoulderAngle = beta + gamma;
 		
-		base.rotateTo((int)Math.round(baseAngle));
-		elbow.rotateTo((int)Math.round(elbowAngle));
-		shoulder.rotateTo((int)Math.round(shoulderAngle));
+		base.rotateTo((int)Math.round(baseAngle)*3);
+		elbow.rotateTo((int)(Math.round(elbowAngle)*elbowGearRatio));
+		shoulder.rotateTo(-(int)(Math.round(shoulderAngle)*shoulderGearRatio));
 		while(base.isMoving() || elbow.isMoving() || shoulder.isMoving()){ /*wait*/ } 
+		
+//		System.out.println("B " + (int)baseAngle+ " s "+ (int)shoulderAngle*shoulderGearRatio + " e " + (int)elbowAngle*elbowGearRatio);
 	}
 	
 	public static void btn2xyzControl() {
@@ -62,6 +64,7 @@ public class MotorControl {
 		LCD.drawString("move to (0, 0, 0) ", 0, 0);
 		LCD.drawString("and press escape", 0, 1);
 		btn2jointControl();
+		
 		while(Button.getButtons() != 0) {/*wait*/}
 		base.resetTachoCount();
 		shoulder.resetTachoCount();
@@ -232,7 +235,7 @@ public class MotorControl {
 		elbow = new EV3LargeRegulatedMotor(MotorPort.C);
 		gripper = new EV3MediumRegulatedMotor(MotorPort.D);
 		base.setSpeed(90);
-		debugPrint(shoulder.getSpeed());				//die Funktion wäre gut
+//		debugPrint(shoulder.getSpeed());				//die Funktion wäre gut
 		String [] header = {"quit",
 							"btn2jointControl",
 							"btn2xyzControl",
