@@ -6,18 +6,24 @@ import lejos.utility.Delay;
 
 import java.lang.Math;
 import lejos.hardware.lcd.LCD;
-//asdfjklö
 
 public class motorMotor {
 	public static EV3LargeRegulatedMotor base;
 	public static EV3LargeRegulatedMotor shoulder;
 	public static EV3LargeRegulatedMotor elbow;
 	public static EV3MediumRegulatedMotor gripper;
-	public static double upperArmLen = 19;
-	public static double lowerArmLen = 17.5;
-	public static double shoulderGearRatio = 125;
-	public static double elbowGearRatio = 25;
+	public static double upperArmLen = 17.5;
+	public static double lowerArmLen = 19;
+	public static double shoulderGearRatio = 125;//125
+	public static double elbowGearRatio = 25;//25
+	public static double baseGearRatio = 3;
+
 	public static boolean open = false;
+	
+	// start Point: (0, upperArmLen, lowerArmLen)
+	static double currBaAngle = 90;
+	static double currShAngle = 90;
+	static double currElAngle = 90;
 	
 	public static void closeGripper() {
 		if(open) {
@@ -46,40 +52,41 @@ public class motorMotor {
 		double r = Math.sqrt(l*l + z*z);
 		double c= Math.cos(elbowAngle/180*Math.PI);
 		double an= c  * upperArmLen;
-<<<<<<< HEAD
 //		System.out.println("cos(elbowangle): " + c);
 //		System.out.println("an: " + an);
-=======
-		//System.out.println("cos(elbowangle): " + c);
-		//System.out.println("an: " + an);
->>>>>>> branch 'markusBranche' of https://github.com/phoenix-error/MegArm.git
 
 		double beta = Math.acos((lowerArmLen+an)/r)*(180/Math.PI);
 		double shoulderAngle = beta + gamma;
 		
-		base.rotateTo((int)Math.round(baseAngle)*3);
-		elbow.rotateTo((int)(Math.round(elbowAngle)*elbowGearRatio));
-		shoulder.rotateTo(-(int)(Math.round(shoulderAngle)*shoulderGearRatio));
-		while(base.isMoving() || elbow.isMoving() || shoulder.isMoving()){ /*wait*/ } 
+		base.rotate((int)(Math.round(baseAngle - currBaAngle)*baseGearRatio));
+		elbow.rotate((int)(Math.round(elbowAngle - currElAngle)*elbowGearRatio));
+		shoulder.rotateTo(-(int)(Math.round(shoulderAngle - currShAngle)*shoulderGearRatio));
+		while(base.isMoving() || elbow.isMoving() || shoulder.isMoving()){ /*wait*/ }
+
+		System.out.println("B " + (int)baseAngle+ " s "+ (int)shoulderAngle*shoulderGearRatio + " e " + (int)elbowAngle*elbowGearRatio);
 		
-//		System.out.println("B " + (int)baseAngle+ " s "+ (int)shoulderAngle*shoulderGearRatio + " e " + (int)elbowAngle*elbowGearRatio);
+		currBaAngle = baseAngle;
+		currElAngle = elbowAngle;
+		currShAngle = shoulderAngle;
 	}
 	
 	public static void btn2xyzControl() {
 		LCD.clearDisplay();
-		LCD.drawString("move to (0, 0, 0) ", 0, 0);
+		LCD.drawString("move to (0, 17.5, 19) ", 0, 0); //all angles at 90 degrees
 		LCD.drawString("and press escape", 0, 1);
 		btn2jointControl();
-		
 		while(Button.getButtons() != 0) {/*wait*/}
-		base.resetTachoCount();
-		shoulder.resetTachoCount();
-		elbow.resetTachoCount();
+//		base.resetTachoCount();
+//		shoulder.resetTachoCount();
+//		elbow.resetTachoCount();
+		currBaAngle = 90;
+		currShAngle = 90;
+		currElAngle = 90;
 		
 		LCD.clearDisplay();
 		LCD.drawString("btn2xyzControl", 0, 0);
 		int x, y, z;
-		x = y = z = 0;
+		x = 0; y = (int)upperArmLen; z = (int)lowerArmLen;
 		int direction = 0;	//0 = x, 1 = y, 2 = z, 3 = gripper
 		int button = 0;
 		boolean change = false;
@@ -241,11 +248,7 @@ public class motorMotor {
 		elbow = new EV3LargeRegulatedMotor(MotorPort.C);
 		gripper = new EV3MediumRegulatedMotor(MotorPort.D);
 		base.setSpeed(90);
-<<<<<<< HEAD
 //		debugPrint(shoulder.getSpeed());				//die Funktion wäre gut
-=======
-		//debugPrint(shoulder.getSpeed());				die Funktion wäre gut
->>>>>>> branch 'markusBranche' of https://github.com/phoenix-error/MegArm.git
 		String [] header = {"quit",
 							"btn2jointControl",
 							"btn2xyzControl",
