@@ -21,12 +21,15 @@ public class AngleTest {
 
 		double beta = Math.acos((lowerArmLen+an)/r)*(180/Math.PI);
 		double shoulderAngle = beta + gamma;
-		
+
+
 		System.out.println("baseAngle: " + baseAngle);
 		System.out.println("r: " + l);
 		System.out.println("elbowAngle: " + elbowAngle);
 		System.out.println("shoulderAngle: " + shoulderAngle);
 		System.out.println(beta);
+
+
 	}
 	
 	public static void main(String[] args) {

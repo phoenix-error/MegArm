@@ -45,8 +45,8 @@ public class MotorControl {
 		double r = Math.sqrt(l*l + z*z);
 		double c= Math.cos(elbowAngle/180*Math.PI);
 		double an= c  * upperArmLen;
-		System.out.println("cos(elbowangle): " + c);
-		System.out.println("an: " + an);
+		//System.out.println("cos(elbowangle): " + c);
+		//System.out.println("an: " + an);
 
 		double beta = Math.acos((lowerArmLen+an)/r)*(180/Math.PI);
 		double shoulderAngle = beta + gamma;
@@ -232,7 +232,7 @@ public class MotorControl {
 		elbow = new EV3LargeRegulatedMotor(MotorPort.C);
 		gripper = new EV3MediumRegulatedMotor(MotorPort.D);
 		base.setSpeed(90);
-		debugPrint(shoulder.getSpeed());				//die Funktion wäre gut
+		//debugPrint(shoulder.getSpeed());				die Funktion wäre gut
 		String [] header = {"quit",
 							"btn2jointControl",
 							"btn2xyzControl",
