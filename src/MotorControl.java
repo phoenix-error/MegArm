@@ -20,7 +20,13 @@ public class MotorControl {
 	
 	public static void closeGripper() {
 		if(open) {
-			gripper.rotate(-90);
+			gripper.rotate(-90, true);  //immidiate Return = true
+			while(gripper.isMoving()) {
+//				if(gripper.isStalled()) {
+//					gripper.stop();
+//				}
+				//TODO: gripper muss wissen, wie weit er wieder aufmachen soll, wenn er beim Schließen blockiert wurde
+			}
 			open = false;
 		}
 	}
@@ -34,22 +40,20 @@ public class MotorControl {
 	public static void moveTo(double x, double y, double z) {
 		double baseAngle = Math.atan2(y, x)*(180/Math.PI);
 		double l = Math.sqrt(x*x + y*y);
-		double elbowAngle = - Math.acos((l*l + z*z - lowerArmLen*lowerArmLen - upperArmLen*upperArmLen)/ (2*upperArmLen*lowerArmLen))*(180/Math.PI);
-//		
-//		double shoulderAngle = Math.atan2(z, l)*(180/Math.PI) + Math.asin(((upperArmLen*Math.sin(elbowAngle))) / (lowerArmLen + upperArmLen*Math.cos(elbowAngle)))*(180/Math.PI);
-		
+		double elbowAngle =  Math.acos((l*l + z*z - lowerArmLen*lowerArmLen - upperArmLen*upperArmLen)/ (2*upperArmLen*lowerArmLen))*(180/Math.PI);		
 		double gamma = Math.atan2(z, l)*(180/Math.PI);
 		double r = Math.sqrt(l*l + z*z);
-		
-		double an= Math.cos(-elbowAngle) * upperArmLen;
-		double geg= Math.sin(-elbowAngle) * upperArmLen;		
-//		double beta = Math.atan2(geg, lowerArmLen + an)*(180./Math.PI);
+		double c= Math.cos(elbowAngle/180*Math.PI);
+		double an= c  * upperArmLen;
+		System.out.println("cos(elbowangle): " + c);
+		System.out.println("an: " + an);
+
 		double beta = Math.acos((lowerArmLen+an)/r)*(180/Math.PI);
 		double shoulderAngle = beta + gamma;
 		
-		base.rotate((int)Math.round(baseAngle));
-		elbow.rotate((int)Math.round(elbowAngle));
-		shoulder.rotate((int)Math.round(shoulderAngle));
+		base.rotateTo((int)Math.round(baseAngle));
+		elbow.rotateTo((int)Math.round(elbowAngle));
+		shoulder.rotateTo((int)Math.round(shoulderAngle));
 		while(base.isMoving() || elbow.isMoving() || shoulder.isMoving()){ /*wait*/ } 
 	}
 	
@@ -59,6 +63,9 @@ public class MotorControl {
 		LCD.drawString("and press escape", 0, 1);
 		btn2jointControl();
 		while(Button.getButtons() != 0) {/*wait*/}
+		base.resetTachoCount();
+		shoulder.resetTachoCount();
+		elbow.resetTachoCount();
 		
 		LCD.clearDisplay();
 		LCD.drawString("btn2xyzControl", 0, 0);
@@ -155,19 +162,19 @@ public class MotorControl {
 					LCD.clear(4);
 					LCD.drawString("base left", 0, 4);
 					base.forward();
-					while(Button.LEFT.isDown()) {/*wait*/}
+					while(Button.LEFT.isDown() && !base.isStalled()) {/*wait*/}
 					base.stop();
 				} else if(mode == 1) {
 					LCD.clear(4);
 					LCD.drawString("shoulder up", 0, 4);
 					shoulder.forward();
-					while(Button.LEFT.isDown()) {/*wait*/}
+					while(Button.LEFT.isDown() && !base.isStalled()) {/*wait*/}
 					shoulder.stop();
 				} else if(mode == 2){
 					LCD.clear(4);
 					LCD.drawString("elbow up", 0, 4);
 					elbow.forward();
-					while(Button.LEFT.isDown()) {/*wait*/}
+					while(Button.LEFT.isDown() && !base.isStalled()) {/*wait*/}
 					elbow.stop();
 				} else if(mode == 3) {
 					LCD.clear(4);
@@ -180,19 +187,19 @@ public class MotorControl {
 					LCD.clear(4);
 					LCD.drawString("base right", 0, 4);
 					base.backward();
-					while(Button.RIGHT.isDown()) {/*wait*/}
+					while(Button.RIGHT.isDown() && !base.isStalled()) {/*wait*/}
 					base.stop();
 				} else if(mode == 1) {
 					LCD.clear(4);
 					LCD.drawString("shoulder down", 0, 4);
 					shoulder.backward();
-					while(Button.RIGHT.isDown()) {/*wait*/}
+					while(Button.RIGHT.isDown() && !base.isStalled()) {/*wait*/}
 					shoulder.stop();
 				} else if(mode == 2){
 					LCD.clear(4);
 					LCD.drawString("elbow down", 0, 4);
 					elbow.backward();
-					while(Button.RIGHT.isDown()) {/*wait*/}
+					while(Button.RIGHT.isDown() && !base.isStalled()) {/*wait*/}
 					elbow.stop();
 				} else if(mode == 3){
 					LCD.clear(4);
@@ -224,8 +231,8 @@ public class MotorControl {
 		shoulder = new EV3LargeRegulatedMotor(MotorPort.B);
 		elbow = new EV3LargeRegulatedMotor(MotorPort.C);
 		gripper = new EV3MediumRegulatedMotor(MotorPort.D);
-//		gripper.setAcceleration(1);
-//		gripper.setSpeed(1);
+		base.setSpeed(90);
+		debugPrint(shoulder.getSpeed());				//die Funktion wäre gut
 		String [] header = {"quit",
 							"btn2jointControl",
 							"btn2xyzControl",
@@ -261,12 +268,16 @@ public class MotorControl {
 			switch (menu) {
 			case 0:
 				quit = true;
+				break;
 			case 1: 
 				btn2jointControl();
+				break;
 			case 2:
 				btn2xyzControl();
+				break;
 			case 3:
 				teachMode();
+				break;
 			default:
 				break;
 			}
