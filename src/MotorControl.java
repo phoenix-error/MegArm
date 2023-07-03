@@ -6,7 +6,7 @@ import lejos.utility.Delay;
 
 import java.lang.Math;
 import lejos.hardware.lcd.LCD;
-//asdf
+//asdfjklö
 
 public class motorMotor {
 	public static EV3LargeRegulatedMotor base;
