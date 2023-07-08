@@ -7,7 +7,7 @@ import lejos.utility.Delay;
 import java.lang.Math;
 import lejos.hardware.lcd.LCD;
 
-public class motorMotor {
+public class MotorControl {
 	public static EV3LargeRegulatedMotor base;
 	public static EV3LargeRegulatedMotor shoulder;
 	public static EV3LargeRegulatedMotor elbow;
@@ -24,22 +24,32 @@ public class motorMotor {
 	static double currBaAngle = 90;
 	static double currShAngle = 90;
 	static double currElAngle = 90;
-	
+
+	// how far the gripper has rotated when it last tried closing
+	// is initialized with -90 so it opens properly when openGripper() is called before closeGripper()
+	// because we assume the gripper starts closed
+	private static int rotatedDistance_Gripper = -90;
+
+	// closes the gripper
+	// if it detects a stall it stops. Whether it stopped or not it remembers how far it rotated.
 	public static void closeGripper() {
 		if(open) {
+			gripper.resetTachoCount();
 			gripper.rotate(-90, true);  //immidiate Return = true
 			while(gripper.isMoving()) {
-//				if(gripper.isStalled()) {
-//					gripper.stop();
-//				}
+				if(gripper.isStalled()) {
+					gripper.stop();
+				}
 				//TODO: gripper muss wissen, wie weit er wieder aufmachen soll, wenn er beim Schließen blockiert wurde
 			}
+			rotatedDistance_Gripper = gripper.getTachoCount();
 			open = false;
 		}
 	}
+	// opens the gripper if it was closed i.e. it rotates rotatedDistance_Gripper back
 	public static void openGripper() {
 		if(!open) {
-			gripper.rotate(90);
+			gripper.rotate(-rotatedDistance_Gripper);
 			open = true;
 		}
 	}
