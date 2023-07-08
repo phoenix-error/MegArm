@@ -30,6 +30,13 @@ public class MotorControl {
 	// because we assume the gripper starts closed
 	private static int rotatedDistance_Gripper = -90;
 
+	// the x,y and z coords of the last saved Position
+	// initialized with the starting position
+	private static int savedPosition_X = 0;
+	private static int savedPosition_Y = 17;
+	private static int savedPosition_Z = 19;
+
+
 	// closes the gripper
 	// if it detects a stall it stops. Whether it stopped or not it remembers how far it rotated.
 	public static void closeGripper() {
@@ -97,20 +104,20 @@ public class MotorControl {
 		LCD.drawString("btn2xyzControl", 0, 0);
 		int x, y, z;
 		x = 0; y = (int)upperArmLen; z = (int)lowerArmLen;
-		int direction = 0;	//0 = x, 1 = y, 2 = z, 3 = gripper
+		int direction = 0;	//0 = x, 1 = y, 2 = z, 3 = gripper, 4 = saving/returning to position
 		int button = 0;
 		boolean change = false;
 		while(true) {		// loop for choosing axis
 			change = false;
 			button = Button.getButtons();
 			if(button == Button.ID_UP) {
-				if(direction < 3) direction++;
-				change = true;
+				if(direction < 4) direction++;
+				//change = true;
 				while(Button.UP.isDown()) {/*wait*/}
 			}
 			if(button == Button.ID_DOWN) {
 				if(direction > 0) direction--;
-				change = true;
+				//change = true;
 				while(Button.DOWN.isDown()) {/*wait*/}
 			}
 			if(button == Button.ID_ESCAPE) {
@@ -131,6 +138,13 @@ public class MotorControl {
 					case 3:
 						closeGripper();
 						break;
+					case 4:
+						// setting the coords to the save ones, moving after button is no longer pressed
+						x = savedPosition_X;
+						y = savedPosition_Y;
+						z = savedPosition_Z;
+						System.out.println("release button to move to saved position");
+						break;
 					default: System.out.println("no direction");
 				}
 				Delay.msDelay(200);
@@ -150,6 +164,15 @@ public class MotorControl {
 					case 3: 
 						openGripper();
 						break;
+					case 4:
+						if(!change) {
+							savedPosition_X = x;
+							savedPosition_Y = y;
+							savedPosition_Z = z;
+						} else {
+							System.out.println("release button to move to saved position");
+						}
+						break;
 					default: System.out.println("no direction");
 				}
 				Delay.msDelay(200);
@@ -159,7 +182,8 @@ public class MotorControl {
 				String[] xyz = {"|x: " + x + "| y: " + y + " z: " + z,
 						"x: " + x + " |y: " + y + "| z: " + z,
 						"x: " + x + " y: " + y + " |z: " + z + "|",
-						"gripper"};
+						"gripper",
+						"L to return, R to save"};
 				LCD.clear(4);
 				LCD.drawString(xyz[direction], 0, 4);
 				moveTo(x, y, z);
