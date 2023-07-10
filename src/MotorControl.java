@@ -223,7 +223,7 @@ public class MotorControl {
 			// press left to return to saved positions
 			if(Button.LEFT.isDown()) {
 				if(saved_Positions.size() == 0) {
-					System.out.println("no saved positions");
+					LCD.drawString("no saved positions",0,3);
 					break;
 				}
 				for (position p: saved_Positions){
@@ -232,12 +232,22 @@ public class MotorControl {
 					y = p.pos_y;
 					z = p.pos_z;
 				}
+				LCD.clear(4);
+				LCD.drawString("teachmode", 0, 0);
+				LCD.drawString("left to return",0,1);
+				LCD.drawString("right to save",0,2);
 				Delay.msDelay(2000);
 			} else if(Button.RIGHT.isDown()) {
 				// drive to position in xyz mode
 				btn2xyzControl();
 				saved_Positions.push(new position(x,y,z));
+				LCD.clear(4);
+				LCD.drawString("position saved",0,0);
 				Delay.msDelay(2000);
+				LCD.clear();
+				LCD.drawString("teachmode", 0, 0);
+				LCD.drawString("left to return",0,1);
+				LCD.drawString("right to save",0,2);
 			}
 		}
 	}
