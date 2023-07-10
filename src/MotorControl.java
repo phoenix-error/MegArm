@@ -89,7 +89,7 @@ public class MotorControl {
 		shoulder.rotateTo(-(int)(Math.round(shoulderAngle - currShAngle)*shoulderGearRatio));
 		while(base.isMoving() || elbow.isMoving() || shoulder.isMoving()){ /*wait*/ }
 
-		System.out.println("B " + (int)baseAngle+ " s "+ (int)shoulderAngle*shoulderGearRatio + " e " + (int)elbowAngle*elbowGearRatio);
+		//System.out.println("B " + (int)baseAngle+ " s "+ (int)shoulderAngle*shoulderGearRatio + " e " + (int)elbowAngle*elbowGearRatio);
 		
 		currBaAngle = baseAngle;
 		currElAngle = elbowAngle;
@@ -231,6 +231,10 @@ public class MotorControl {
 					x = p.pos_x;
 					y = p.pos_y;
 					z = p.pos_z;
+					LCD.drawString("moved to "+ x +" " + y +" " + " " + z, 0, 5 );
+					Delay.msDelay(1000);
+					LCD.clear();
+
 				}
 				LCD.clear(4);
 				LCD.drawString("teachmode", 0, 0);
