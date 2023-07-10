@@ -1,6 +1,10 @@
-import java.io.*;
-import lejos.nxt.*;
-import lejos.nxt.comm.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import lejos.remote.nxt.BTConnector;
+import lejos.remote.nxt.NXTConnection;
 
 public class BTJ {
 
@@ -26,6 +30,7 @@ public class BTJ {
                 System.out.println("2. Message: " + message);
             } catch (IOException e) {
                 e.printStackTrace(System.out);
+            }
 
         }
     }
