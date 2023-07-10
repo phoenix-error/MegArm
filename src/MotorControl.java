@@ -3,9 +3,19 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.MotorPort;
 import lejos.utility.Delay;
+import java.util.LinkedList;
 
 import java.lang.Math;
 import lejos.hardware.lcd.LCD;
+
+class position {
+	public int pos_x,pos_y,pos_z;
+	position(int _pos_x, int _pos_y, int _pos_z) {
+		pos_x = _pos_x;
+		pos_y = _pos_y;
+		pos_z = _pos_z;
+	}
+}
 
 public class MotorControl {
 	public static EV3LargeRegulatedMotor base;
@@ -31,10 +41,9 @@ public class MotorControl {
 	private static int rotatedDistance_Gripper = -90;
 
 	// the x,y and z coords of the last saved Position
-	// initialized with the starting position
-	private static int savedPosition_X = 0;
-	private static int savedPosition_Y = 17;
-	private static int savedPosition_Z = 19;
+	private static LinkedList<position> saved_Positions = new LinkedList<position>();
+
+	private static int x,y,z;
 
 
 	// closes the gripper
@@ -102,7 +111,6 @@ public class MotorControl {
 		
 		LCD.clearDisplay();
 		LCD.drawString("btn2xyzControl", 0, 0);
-		int x, y, z;
 		x = 0; y = (int)upperArmLen; z = (int)lowerArmLen;
 		int direction = 0;	//0 = x, 1 = y, 2 = z, 3 = gripper, 4 = saving/returning to position
 		int button = 0;
@@ -111,7 +119,7 @@ public class MotorControl {
 			change = false;
 			button = Button.getButtons();
 			if(button == Button.ID_UP) {
-				if(direction < 4) direction++;
+				if(direction < 3) direction++;
 				//change = true;
 				while(Button.UP.isDown()) {/*wait*/}
 			}
@@ -138,6 +146,7 @@ public class MotorControl {
 					case 3:
 						closeGripper();
 						break;
+						/*
 					case 4:
 						// setting the coords to the save ones, moving after button is no longer pressed
 						x = savedPosition_X;
@@ -145,6 +154,7 @@ public class MotorControl {
 						z = savedPosition_Z;
 						System.out.println("release button to move to saved position");
 						break;
+					*/
 					default: System.out.println("no direction");
 				}
 				Delay.msDelay(200);
@@ -164,6 +174,7 @@ public class MotorControl {
 					case 3: 
 						openGripper();
 						break;
+						/*
 					case 4:
 						if(!change) {
 							savedPosition_X = x;
@@ -173,6 +184,7 @@ public class MotorControl {
 							System.out.println("release button to move to saved position");
 						}
 						break;
+						*/
 					default: System.out.println("no direction");
 				}
 				Delay.msDelay(200);
@@ -182,8 +194,7 @@ public class MotorControl {
 				String[] xyz = {"|x: " + x + "| y: " + y + " z: " + z,
 						"x: " + x + " |y: " + y + "| z: " + z,
 						"x: " + x + " y: " + y + " |z: " + z + "|",
-						"gripper",
-						"L to return, R to save"};
+						"gripper",};
 				LCD.clear(4);
 				LCD.drawString(xyz[direction], 0, 4);
 				moveTo(x, y, z);
@@ -192,7 +203,43 @@ public class MotorControl {
 	}
 	
 	public static void teachMode() {
-		return;
+		// setup
+		LCD.clear(4);
+		LCD.drawString("teachmode", 0, 0);
+		LCD.drawString("left to return",0,1);
+		LCD.drawString("right to save",0,2);
+		// initializing Button
+		int button = 0;
+		button = Button.getButtons();
+
+		// main loop
+		while(true) {
+
+			if(button == Button.ID_ESCAPE) {
+				break;
+			}
+
+			// press right to add new position
+			// press left to return to saved positions
+			if(Button.LEFT.isDown()) {
+				if(saved_Positions.size() == 0) {
+					System.out.println("no saved positions");
+					break;
+				}
+				for (position p: saved_Positions){
+					moveTo(p.pos_x,p.pos_y,p.pos_z);
+					x = p.pos_x;
+					y = p.pos_y;
+					z = p.pos_z;
+				}
+				Delay.msDelay(2000);
+			} else if(Button.RIGHT.isDown()) {
+				// drive to position in xyz mode
+				btn2xyzControl();
+				saved_Positions.push(new position(x,y,z));
+				Delay.msDelay(2000);
+			}
+		}
 	}
 
 	public static void btn2jointControl() {
