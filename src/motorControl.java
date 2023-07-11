@@ -27,6 +27,8 @@ class MegArm {
 	public double shoulderGearRatio = 125;//125
 	public double elbowGearRatio = 25;//25
 	public double baseGearRatio = 3;
+	public double maxRange = 35; // max Range, the MegArm can reach
+	public double minRange = 8; // min Range, the MegArm can reach
 
 	public static boolean open = true;
 	
@@ -41,9 +43,34 @@ class MegArm {
 	private int rotatedDistance_Gripper = -90;
 
 	// the x,y and z coords of the last saved Position
-	private static LinkedList<position> saved_Positions = new LinkedList<position>();
+	private LinkedList<position> saved_Positions = new LinkedList<position>();
 
-	private static int x,y,z;
+	private int x,y,z;
+	
+	private void changeX(String plusminus) {
+		if(plusminus == "+" && x < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(z, 2))-1) { //sphere around the Base with radius maxRange
+			x++;
+		}
+		else if(plusminus == "-" && x > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(z, 2))+1) { //sphere around the Base with radius minRange
+			x--;
+		}
+	}
+	private void changeY(String plusminus) {
+		if(plusminus == "+" && y < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(x, 2) - Math.pow(z, 2))-1) {
+			y++;
+		}
+		else if(plusminus == "-" && y > Math.sqrt(Math.pow(minRange, 2) - Math.pow(x, 2) - Math.pow(z, 2))+1) {
+			y--;
+		}
+	}
+	private void changeZ(String plusminus) {
+		if(plusminus == "+" && z < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))-1) {
+			z++;
+		}
+		else if(plusminus == "-" && z > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))+1) {
+			z--;
+		}
+	}
 
 
 	// closes the gripper
@@ -137,13 +164,13 @@ class MegArm {
 			while(Button.LEFT.isDown()) {	
 				switch (direction) {
 					case 0:
-						x--;
+						changeX("-");
 						break;
 					case 1:
-						y--;
+						changeY("-");
 						break;
 					case 2: 
-						z--;
+						changeZ("-");
 						break;
 					case 3:
 						closeGripper();
@@ -165,13 +192,13 @@ class MegArm {
 			while(Button.RIGHT.isDown()) {
 				switch (direction) {
 					case 0: 
-						x++;
+						changeX("+");
 						break;
 					case 1: 
-						y++;
+						changeY("+");
 						break;
 					case 2: 
-						z++;
+						changeZ("+");
 						break;
 					case 3: 
 						openGripper();
