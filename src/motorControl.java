@@ -1,3 +1,6 @@
+//asdf
+
+
 import lejos.hardware.Button;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
@@ -17,60 +20,89 @@ class position {
 	}
 }
 
-public class motorControl {
-	public static EV3LargeRegulatedMotor base;
-	public static EV3LargeRegulatedMotor shoulder;
-	public static EV3LargeRegulatedMotor elbow;
-	public static EV3MediumRegulatedMotor gripper;
-	public static double upperArmLen = 17.5;
-	public static double lowerArmLen = 19;
-	public static double shoulderGearRatio = 125;//125
-	public static double elbowGearRatio = 25;//25
-	public static double baseGearRatio = 3;
+class MegArm {
+	public EV3LargeRegulatedMotor base;
+	public EV3LargeRegulatedMotor shoulder;
+	public EV3LargeRegulatedMotor elbow;
+	public EV3MediumRegulatedMotor gripper;
+	public double upperArmLen = 17.5;
+	public double lowerArmLen = 19;
+	public double shoulderGearRatio = 125;//125
+	public double elbowGearRatio = 25;//25
+	public double baseGearRatio = 3;
+	public double maxRange = 35; // max Range, the MegArm can reach
+	public double minRange = 8; // min Range, the MegArm can reach
 
 	public static boolean open = true;
 	
 	// start Point: (0, upperArmLen, lowerArmLen)
-	static double currBaAngle = 90;
-	static double currShAngle = 90;
-	static double currElAngle = 90;
+	double currBaAngle = 90;
+	double currShAngle = 90;
+	double currElAngle = 90;
 
 	// how far the gripper has rotated when it last tried closing
 	// is initialized with -90 so it opens properly when openGripper() is called before closeGripper()
 	// because we assume the gripper starts closed
-	private static int rotatedDistance_Gripper = -90;
+	private int rotatedDistance_Gripper = -90;
 
 	// the x,y and z coords of the last saved Position
-	private static LinkedList<position> saved_Positions = new LinkedList<position>();
+	private LinkedList<position> saved_Positions = new LinkedList<position>();
 
-	private static int x,y,z;
+	private int x,y,z;
+	
+	private void changeX(String plusminus) {
+		if(plusminus == "+" && x < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(z, 2))-1) { //sphere around the Base with radius maxRange
+			x++;
+		}
+		else if(plusminus == "-" && x > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(z, 2))+1) { //sphere around the Base with radius minRange
+			x--;
+		}
+	}
+	private void changeY(String plusminus) {
+		if(plusminus == "+" && y < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(x, 2) - Math.pow(z, 2))-1) {
+			y++;
+		}
+		else if(plusminus == "-" && y > Math.sqrt(Math.pow(minRange, 2) - Math.pow(x, 2) - Math.pow(z, 2))+1) {
+			y--;
+		}
+	}
+	private void changeZ(String plusminus) {
+		if(plusminus == "+" && z < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))-1) {
+			z++;
+		}
+		else if(plusminus == "-" && z > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))+1) {
+			z--;
+		}
+	}
 
 
 	// closes the gripper
 	// if it detects a stall it stops. Whether it stopped or not it remembers how far it rotated.
-	public static void closeGripper() {
+	public void closeGripper() {
 		if(open) {
 			gripper.resetTachoCount();
-			gripper.rotate(-90, true);  //immidiate Return = true
+			gripper.rotate(-120, true);  //immidiate Return = true
 			while(gripper.isMoving()) {
 				if(gripper.isStalled()) {
 					gripper.stop();
 				}
 				//TODO: gripper muss wissen, wie weit er wieder aufmachen soll, wenn er beim Schließen blockiert wurde
 			}
+			gripper.stop();
+
 			rotatedDistance_Gripper = gripper.getTachoCount();
 			open = false;
 		}
 	}
 	// opens the gripper if it was closed i.e. it rotates rotatedDistance_Gripper back
-	public static void openGripper() {
+	public void openGripper() {
 		if(!open) {
 			gripper.rotate(-rotatedDistance_Gripper);
 			open = true;
 		}
 	}
 	
-	public static void moveTo(double x, double y, double z) {
+	public void moveTo(double x, double y, double z) {
 		double baseAngle = Math.atan2(y, x)*(180/Math.PI);
 		double l = Math.sqrt(x*x + y*y);
 		double elbowAngle =  Math.acos((l*l + z*z - lowerArmLen*lowerArmLen - upperArmLen*upperArmLen)/ (2*upperArmLen*lowerArmLen))*(180/Math.PI);		
@@ -96,7 +128,7 @@ public class motorControl {
 		currShAngle = shoulderAngle;
 	}
 	
-	public static void btn2xyzControl() {
+	public void btn2xyzControl() {
 		LCD.clearDisplay();
 		LCD.drawString("move to (0, 17.5, 19) ", 0, 0); //all angles at 90 degrees
 		LCD.drawString("and press escape", 0, 1);
@@ -135,13 +167,13 @@ public class motorControl {
 			while(Button.LEFT.isDown()) {	
 				switch (direction) {
 					case 0:
-						x--;
+						changeX("-");
 						break;
 					case 1:
-						y--;
+						changeY("-");
 						break;
 					case 2: 
-						z--;
+						changeZ("-");
 						break;
 					case 3:
 						closeGripper();
@@ -163,13 +195,13 @@ public class motorControl {
 			while(Button.RIGHT.isDown()) {
 				switch (direction) {
 					case 0: 
-						x++;
+						changeX("+");
 						break;
 					case 1: 
-						y++;
+						changeY("+");
 						break;
 					case 2: 
-						z++;
+						changeZ("+");
 						break;
 					case 3: 
 						openGripper();
@@ -202,7 +234,7 @@ public class motorControl {
 		}
 	}
 	
-	public static void teachMode() {
+	public void teachMode() {
 		// setup
 		LCD.clear(4);
 		LCD.drawString("teachmode", 0, 0);
@@ -256,7 +288,7 @@ public class motorControl {
 		}
 	}
 
-	public static void btn2jointControl() {
+	public void btn2jointControl() {
 		int mode = 0;	//0 = base, 1 = shoulder, 2 = elbow, 3 = gripper
 		int button = 0;
 		String[] joints = {
@@ -336,13 +368,21 @@ public class motorControl {
 			}
 		}
 	}
-
-	public static void main(String[] args) {		
+	public void init() {
 		base = new EV3LargeRegulatedMotor(MotorPort.A);
 		shoulder = new EV3LargeRegulatedMotor(MotorPort.B);
 		elbow = new EV3LargeRegulatedMotor(MotorPort.C);
 		gripper = new EV3MediumRegulatedMotor(MotorPort.D);
 		base.setSpeed(90);
+	}
+}
+
+public class motorControl {
+
+	public static void main(String[] args) {		
+		MegArm arm = new MegArm();
+		arm.init();
+		
 //		debugPrint(shoulder.getSpeed());				//die Funktion wäre gut
 		String [] header = {"quit",
 							"btn2jointControl",
@@ -381,13 +421,13 @@ public class motorControl {
 				quit = true;
 				break;
 			case 1: 
-				btn2jointControl();
+				arm.btn2jointControl();
 				break;
 			case 2:
-				btn2xyzControl();
+				arm.btn2xyzControl();
 				break;
 			case 3:
-				teachMode();
+				arm.teachMode();
 				break;
 			default:
 				break;
