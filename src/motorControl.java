@@ -27,10 +27,10 @@ class MegArm {
 	public double shoulderGearRatio = 125;//125
 	public double elbowGearRatio = 25;//25
 	public double baseGearRatio = 3;
+	private int maxMotorSpeed = 900; 	// max Speet the shoulder motor can reach (max 100*battery voltage). elbowSpeed=1/5 of it.
 	public double maxRange = 35; // max Range, the MegArm can reach
 	public double minRange = 8; // min Range, the MegArm can reach
-
-	public static boolean open = true;
+	public boolean open = true;
 	
 	// start Point: (0, upperArmLen, lowerArmLen)
 	double currBaAngle = 90;
@@ -105,20 +105,14 @@ class MegArm {
 		double elbowAngle =  Math.acos((l*l + z*z - lowerArmLen*lowerArmLen - upperArmLen*upperArmLen)/ (2*upperArmLen*lowerArmLen))*(180/Math.PI);		
 		double gamma = Math.atan2(z, l)*(180/Math.PI);
 		double r = Math.sqrt(l*l + z*z);
-		double c= Math.cos(elbowAngle/180*Math.PI);
-		double an= c  * upperArmLen;
-//		System.out.println("cos(elbowangle): " + c);
-//		System.out.println("an: " + an);#
-
-		double beta = Math.acos((lowerArmLen+an)/r)*(180/Math.PI);
+		double beta = Math.acos((lowerArmLen*lowerArmLen+r*r-upperArmLen*upperArmLen)/(2*lowerArmLen*r))*(180/Math.PI);
 		double shoulderAngle = beta + gamma;
 		
-		base.rotate((int)(Math.round(baseAngle - currBaAngle)*baseGearRatio));
-		elbow.rotate((int)(Math.round(elbowAngle - currElAngle)*elbowGearRatio));
-		shoulder.rotateTo(-(int)(Math.round(shoulderAngle - currShAngle)*shoulderGearRatio));
+		base.rotate((int)(Math.round(baseAngle - currBaAngle)*baseGearRatio), true);		//immediateReturn = true
+		elbow.rotate((int)(Math.round(elbowAngle - currElAngle)*elbowGearRatio), true);
+		shoulder.rotate(-(int)(Math.round(shoulderAngle - currShAngle)*shoulderGearRatio), true);
+		
 		while(base.isMoving() || elbow.isMoving() || shoulder.isMoving()){ /*wait*/ }
-
-		//System.out.println("B " + (int)baseAngle+ " s "+ (int)shoulderAngle*shoulderGearRatio + " e " + (int)elbowAngle*elbowGearRatio);
 		
 		currBaAngle = baseAngle;
 		currElAngle = elbowAngle;
@@ -371,6 +365,8 @@ class MegArm {
 		elbow = new EV3LargeRegulatedMotor(MotorPort.C);
 		gripper = new EV3MediumRegulatedMotor(MotorPort.D);
 		base.setSpeed(90);
+		shoulder.setSpeed(maxMotorSpeed);
+		elbow.setSpeed(maxMotorSpeed/5);
 	}
 }
 
