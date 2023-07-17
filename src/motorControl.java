@@ -18,19 +18,20 @@ class position {
 }
 
 class MegArm {
-	public EV3LargeRegulatedMotor base;
-	public EV3LargeRegulatedMotor shoulder;
-	public EV3LargeRegulatedMotor elbow;
-	public EV3MediumRegulatedMotor gripper;
-	public double upperArmLen = 17.5;
-	public double lowerArmLen = 19;
-	public double shoulderGearRatio = 125;//125
-	public double elbowGearRatio = 25;//25
-	public double baseGearRatio = 3;
+	private EV3LargeRegulatedMotor base;
+	private EV3LargeRegulatedMotor shoulder;
+	private EV3LargeRegulatedMotor elbow;
+	private EV3MediumRegulatedMotor gripper;
+	private double upperArmLen = 17.5;
+	private double lowerArmLen = 19;
+	private double shoulderGearRatio = 125;//125
+	private double elbowGearRatio = 25;//25
+	private double baseGearRatio = 3;
 	private int maxMotorSpeed = 900; 	// max Speet the shoulder motor can reach (max 100*battery voltage). elbowSpeed=1/5 of it.
-	public double maxRange = 35; // max Range, the MegArm can reach
-	public double minRange = 8; // min Range, the MegArm can reach
-	public boolean open = true;
+	private double maxRange = 35; // max Range, the MegArm can reach
+	private double minRange = 8; // min Range, the MegArm can reach
+	private boolean open = true;
+	private int zOffset = 5; 
 	
 	// start Point: (0, upperArmLen, lowerArmLen)
 	double currBaAngle = 90;
@@ -64,10 +65,10 @@ class MegArm {
 		}
 	}
 	private void changeZ(String plusminus) {
-		if(plusminus == "+" && z < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))-1) {
+		if(plusminus == "+" && z + zOffset < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))-1) {
 			z++;
 		}
-		else if(plusminus == "-" && z > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))+1) {
+		else if(plusminus == "-" && z + zOffset > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))+1) {
 			z--;
 		}
 	}
@@ -124,10 +125,8 @@ class MegArm {
 		LCD.drawString("move to (0, 17.5, 19) ", 0, 0); //all angles at 90 degrees
 		LCD.drawString("and press escape", 0, 1);
 		btn2jointControl();
+		
 		while(Button.getButtons() != 0) {/*wait*/}
-//		base.resetTachoCount();
-//		shoulder.resetTachoCount();
-//		elbow.resetTachoCount();
 		currBaAngle = 90;
 		currShAngle = 90;
 		currElAngle = 90;
@@ -220,7 +219,7 @@ class MegArm {
 						"gripper",};
 				LCD.clear(4);
 				LCD.drawString(xyz[direction], 0, 4);
-				moveTo(x, y, z);
+				moveTo(x, y, z+zOffset);
 			}
 		}
 	}
