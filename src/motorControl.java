@@ -52,28 +52,33 @@ class MegArm {
 		if(plusminus.equals("+") && x < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(z, 2))-1) { //sphere around the Base with radius maxRange
 			x++;
 		}
-		else if(plusminus.equals("-") && (x > (Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(z, 2))+1))) { //sphere around the Base with radius minRange
-			x--;
-			LCD.drawString("x else", 0, 5);
-			Delay.msDelay(1000);
-		}
+		else if(plusminus.equals("-")) {
+			if(minRange - Math.pow(y,2) - Math.pow(z,2) < 0 && x > 0) x--;
+			else if (x > (Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(z, 2)) + 1)){
+				x--;
+			}
+		} //sphere around the Base with radius minRange
 	}
 	private void changeY(String plusminus) {
 		if(plusminus.equals("+") && y < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(x, 2) - Math.pow(z, 2))-1) {
 			y++;
 		}
-		else if(plusminus.equals("-") && y > Math.sqrt(Math.pow(minRange, 2) - Math.pow(x, 2) - Math.pow(z, 2))+1) {
-			LCD.drawString("y else", 0, 5);
-			y--;
+		else if(plusminus.equals("-")) {
+			if (minRange - Math.pow(x,2) - Math.pow(z,2) < 0 && y > 0) y--;
+			else if (y > Math.sqrt(Math.pow(minRange, 2) - Math.pow(x, 2) - Math.pow(z, 2)) + 1) {
+				y--;
+			}
 		}
 	}
 	private void changeZ(String plusminus) {
 		if(plusminus.equals("+") && z < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))-1) {
 			z++;
 		}
-		else if(plusminus.equals("-") && z > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))+1) {
-			LCD.drawString("z else", 0, 5);
-			z--;
+		else if(plusminus.equals("-")) {
+			if(minRange - Math.pow(x,2) - Math.pow(y,2) < 0 && z > 0) z--;
+			else if (z > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2)) + 1) {
+				z--;
+			}
 		}
 	}
 
