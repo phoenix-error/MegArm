@@ -49,26 +49,30 @@ class MegArm {
 	private int x,y,z;
 	
 	private void changeX(String plusminus) {
-		if(plusminus == "+" && x < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(z, 2))-1) { //sphere around the Base with radius maxRange
+		if(plusminus.equals("+") && x < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(z, 2))-1) { //sphere around the Base with radius maxRange
 			x++;
 		}
-		else if(plusminus == "-" && x > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(z, 2))+1) { //sphere around the Base with radius minRange
+		else if(plusminus.equals("-") && (x > (Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(z, 2))+1))) { //sphere around the Base with radius minRange
 			x--;
+			LCD.drawString("x else", 0, 5);
+			Delay.msDelay(1000);
 		}
 	}
 	private void changeY(String plusminus) {
-		if(plusminus == "+" && y < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(x, 2) - Math.pow(z, 2))-1) {
+		if(plusminus.equals("+") && y < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(x, 2) - Math.pow(z, 2))-1) {
 			y++;
 		}
-		else if(plusminus == "-" && y > Math.sqrt(Math.pow(minRange, 2) - Math.pow(x, 2) - Math.pow(z, 2))+1) {
+		else if(plusminus.equals("-") && y > Math.sqrt(Math.pow(minRange, 2) - Math.pow(x, 2) - Math.pow(z, 2))+1) {
+			LCD.drawString("y else", 0, 5);
 			y--;
 		}
 	}
 	private void changeZ(String plusminus) {
-		if(plusminus == "+" && z < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))-1) {
+		if(plusminus.equals("+") && z < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))-1) {
 			z++;
 		}
-		else if(plusminus == "-" && z > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))+1) {
+		else if(plusminus.equals("-") && z > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))+1) {
+			LCD.drawString("z else", 0, 5);
 			z--;
 		}
 	}
@@ -160,12 +164,18 @@ class MegArm {
 				switch (direction) {
 					case 0:
 						changeX("-");
+						LCD.drawString("x-", 0, 5);
+						Delay.msDelay(1000);
 						break;
 					case 1:
 						changeY("-");
+						LCD.drawString("y-", 0, 5);
+						Delay.msDelay(1000);
 						break;
 					case 2: 
 						changeZ("-");
+						LCD.drawString("z-", 0, 5);
+						Delay.msDelay(1000);
 						break;
 					case 3:
 						closeGripper();
@@ -371,7 +381,8 @@ class MegArm {
 	}
 }
 
-public class motorControl {
+public class motorControl {
+
 	public static void main(String[] args) {		
 		MegArm arm = new MegArm();
 		arm.init();
