@@ -22,16 +22,16 @@ class MegArm {
 	private EV3LargeRegulatedMotor shoulder;
 	private EV3LargeRegulatedMotor elbow;
 	private EV3MediumRegulatedMotor gripper;
-	private double upperArmLen = 17.5;
-	private double lowerArmLen = 19;
+	private double upperArmLen = 19;
+	private double lowerArmLen = 17.5;
 	private double shoulderGearRatio = 125;//125
 	private double elbowGearRatio = 25;//25
 	private double baseGearRatio = 3;
 	private int maxMotorSpeed = 900; 	// max Speet the shoulder motor can reach (max 100*battery voltage). elbowSpeed=1/5 of it.
 	private double maxRange = 35; // max Range, the MegArm can reach
-	private double minRange = 8; // min Range, the MegArm can reach
+	private double minRange = 1; // min Range, the MegArm can reach
 	private boolean open = true;
-	private int zOffset = 5; 
+//	private double zOffset = 17.5; 
 	
 	// start Point: (0, upperArmLen, lowerArmLen)
 	double currBaAngle = 90;
@@ -65,10 +65,10 @@ class MegArm {
 		}
 	}
 	private void changeZ(String plusminus) {
-		if(plusminus == "+" && z + zOffset < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))-1) {
+		if(plusminus == "+" && z < Math.sqrt(Math.pow(maxRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))-1) {
 			z++;
 		}
-		else if(plusminus == "-" && z + zOffset > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))+1) {
+		else if(plusminus == "-" && z > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2))+1) {
 			z--;
 		}
 	}
@@ -94,10 +94,11 @@ class MegArm {
 	}
 	// opens the gripper if it was closed i.e. it rotates rotatedDistance_Gripper back
 	public void openGripper() {
-		if(!open) {
-			gripper.rotate(-rotatedDistance_Gripper);
-			open = true;
-		}
+//		if(!open) {
+//			gripper.rotate(-rotatedDistance_Gripper);
+//			open = true;
+//		}
+		gripper.rotate(5);
 	}
 	
 	public void moveTo(double x, double y, double z) {
@@ -111,7 +112,7 @@ class MegArm {
 		
 		base.rotate((int)(Math.round(baseAngle - currBaAngle)*baseGearRatio), true);		//immediateReturn = true
 		elbow.rotate((int)(Math.round(elbowAngle - currElAngle)*elbowGearRatio), true);
-		shoulder.rotate(-(int)(Math.round(shoulderAngle - currShAngle)*shoulderGearRatio), true);
+		shoulder.rotate((int)(Math.round(shoulderAngle - currShAngle)*shoulderGearRatio), true);
 		
 		while(base.isMoving() || elbow.isMoving() || shoulder.isMoving()){ /*wait*/ }
 		
@@ -134,6 +135,7 @@ class MegArm {
 		LCD.clearDisplay();
 		LCD.drawString("btn2xyzControl", 0, 0);
 		x = 0; y = (int)upperArmLen; z = (int)lowerArmLen;
+		
 		int direction = 0;	//0 = x, 1 = y, 2 = z, 3 = gripper, 4 = saving/returning to position
 		int button = 0;
 		boolean change = false;
@@ -142,12 +144,12 @@ class MegArm {
 			button = Button.getButtons();
 			if(button == Button.ID_UP) {
 				if(direction < 3) direction++;
-				//change = true;
+				change = true;
 				while(Button.UP.isDown()) {/*wait*/}
 			}
 			if(button == Button.ID_DOWN) {
 				if(direction > 0) direction--;
-				//change = true;
+				change = true;
 				while(Button.DOWN.isDown()) {/*wait*/}
 			}
 			if(button == Button.ID_ESCAPE) {
@@ -219,7 +221,7 @@ class MegArm {
 						"gripper",};
 				LCD.clear(4);
 				LCD.drawString(xyz[direction], 0, 4);
-				moveTo(x, y, z+zOffset);
+				moveTo(x, y, z);
 			}
 		}
 	}
