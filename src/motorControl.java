@@ -10,10 +10,12 @@ import lejos.hardware.lcd.LCD;
 
 class position {
 	public int pos_x,pos_y,pos_z;
-	position(int _pos_x, int _pos_y, int _pos_z) {
+	public boolean gOpen;
+	position(int _pos_x, int _pos_y, int _pos_z, boolean open) {
 		pos_x = _pos_x;
 		pos_y = _pos_y;
 		pos_z = _pos_z;
+		open = gOpen;
 	}
 }
 
@@ -29,9 +31,9 @@ class MegArm {
 	private double baseGearRatio = 3;
 	private int maxMotorSpeed = 900; 	// max Speet the shoulder motor can reach (max 100*battery voltage). elbowSpeed=1/5 of it.
 	private double maxRange = 35; // max Range, the MegArm can reach
-	private double minRange = 1; // min Range, the MegArm can reach
+	private double minRange = 8; // min Range, the MegArm can reach
 	private boolean open = true;
-//	private double zOffset = 17.5; 
+	private double zOffset = 15; 
 	
 	// start Point: (0, upperArmLen, lowerArmLen)
 	double currBaAngle = 90;
@@ -53,7 +55,7 @@ class MegArm {
 			x++;
 		}
 		else if(plusminus.equals("-")) {
-			if(minRange - Math.pow(y,2) - Math.pow(z,2) < 0 && x > 0) x--;
+			if(Math.pow(minRange, 2) - Math.pow(y,2) - Math.pow(z,2) < 0 && x > 0) x--;
 			else if (x > (Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(z, 2)) + 1)){
 				x--;
 			}
@@ -64,7 +66,7 @@ class MegArm {
 			y++;
 		}
 		else if(plusminus.equals("-")) {
-			if (minRange - Math.pow(x,2) - Math.pow(z,2) < 0 && y > 0) y--;
+			if (Math.pow(minRange, 2) - Math.pow(x,2) - Math.pow(z,2) < 0 && y > 0) y--;
 			else if (y > Math.sqrt(Math.pow(minRange, 2) - Math.pow(x, 2) - Math.pow(z, 2)) + 1) {
 				y--;
 			}
@@ -75,7 +77,7 @@ class MegArm {
 			z++;
 		}
 		else if(plusminus.equals("-")) {
-			if(minRange - Math.pow(x,2) - Math.pow(y,2) < 0 && z > 0) z--;
+			if(Math.pow(minRange, 2) - Math.pow(x,2) - Math.pow(y,2) < 0 && z > 0) z--;
 			else if (z > Math.sqrt(Math.pow(minRange, 2) - Math.pow(y, 2) - Math.pow(x, 2)) + 1) {
 				z--;
 			}
@@ -143,7 +145,7 @@ class MegArm {
 		
 		LCD.clearDisplay();
 		LCD.drawString("btn2xyzControl", 0, 0);
-		x = 0; y = (int)upperArmLen; z = (int)lowerArmLen;
+		x = 0; y = (int)upperArmLen; z = (int)lowerArmLen - (int)zOffset;
 		
 		int direction = 0;	//0 = x, 1 = y, 2 = z, 3 = gripper, 4 = saving/returning to position
 		int button = 0;
@@ -169,18 +171,12 @@ class MegArm {
 				switch (direction) {
 					case 0:
 						changeX("-");
-						LCD.drawString("x-", 0, 5);
-						Delay.msDelay(1000);
 						break;
 					case 1:
 						changeY("-");
-						LCD.drawString("y-", 0, 5);
-						Delay.msDelay(1000);
 						break;
 					case 2: 
 						changeZ("-");
-						LCD.drawString("z-", 0, 5);
-						Delay.msDelay(1000);
 						break;
 					case 3:
 						closeGripper();
@@ -236,7 +232,7 @@ class MegArm {
 						"gripper",};
 				LCD.clear(4);
 				LCD.drawString(xyz[direction], 0, 4);
-				moveTo(x, y, z);
+				moveTo(x, y, z+(int)zOffset);
 			}
 		}
 	}
@@ -249,10 +245,10 @@ class MegArm {
 		LCD.drawString("right to save",0,2);
 		// initializing Button
 		int button = 0;
-		button = Button.getButtons();
 
 		// main loop
 		while(true) {
+			button = Button.getButtons();
 
 			if(button == Button.ID_ESCAPE) {
 				break;
@@ -266,7 +262,7 @@ class MegArm {
 					break;
 				}
 				for (position p: saved_Positions){
-					moveTo(p.pos_x,p.pos_y,p.pos_z);
+					moveTo(p.pos_x,p.pos_y,p.pos_z+(int)zOffset);
 					x = p.pos_x;
 					y = p.pos_y;
 					z = p.pos_z;
@@ -283,7 +279,7 @@ class MegArm {
 			} else if(Button.RIGHT.isDown()) {
 				// drive to position in xyz mode
 				btn2xyzControl();
-				saved_Positions.addFirst(new position(x,y,z));
+				saved_Positions.addLast(new position(x,y,z));;
 				LCD.clear(4);
 				LCD.drawString("position saved",0,0);
 				Delay.msDelay(2000);
