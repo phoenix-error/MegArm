@@ -105,11 +105,10 @@ class MegArm {
 	}
 	// opens the gripper if it was closed i.e. it rotates rotatedDistance_Gripper back
 	public void openGripper() {
-//		if(!open) {
-//			gripper.rotate(-rotatedDistance_Gripper);
-//			open = true;
-//		}
-		gripper.rotate(5);
+		if(!open) {
+			gripper.rotate(-rotatedDistance_Gripper);
+			open = true;
+		}
 	}
 	
 	public void moveTo(double x, double y, double z) {
@@ -266,6 +265,8 @@ class MegArm {
 					x = p.pos_x;
 					y = p.pos_y;
 					z = p.pos_z;
+					if(p.gOpen && !open ) openGripper();
+					else if( !p.gOpen && open ) closeGripper();
 					LCD.drawString("moved to "+ x +" " + y +" " + " " + z, 0, 5 );
 					Delay.msDelay(1000);
 					LCD.clear();
@@ -275,14 +276,16 @@ class MegArm {
 				LCD.drawString("teachmode", 0, 0);
 				LCD.drawString("left to return",0,1);
 				LCD.drawString("right to save",0,2);
-				Delay.msDelay(2000);
+				Delay.msDelay(1000);
+
 			} else if(Button.RIGHT.isDown()) {
 				// drive to position in xyz mode
 				btn2xyzControl();
-				saved_Positions.addLast(new position(x,y,z));;
+				saved_Positions.addLast(new position(x,y,z,open));;
+
 				LCD.clear(4);
 				LCD.drawString("position saved",0,0);
-				Delay.msDelay(2000);
+				Delay.msDelay(1000);
 				LCD.clear();
 				LCD.drawString("teachmode", 0, 0);
 				LCD.drawString("left to return",0,1);
