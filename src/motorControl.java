@@ -360,13 +360,13 @@ class MegArm {
 			if(button == Button.ID_UP) {
 				if(mode < 3) mode++;
 				LCD.clear(2);
-				LCD.drawString(joints[mode], 0, 2);
+				LCD.drawString(joints[mode], 0, 3);
 				while(Button.UP.isDown()) {/*wait*/}
 			}
 			if(button == Button.ID_DOWN) {
 				if(mode > 0) mode--;
 				LCD.clear(2);
-				LCD.drawString(joints[mode], 0, 2);
+				LCD.drawString(joints[mode], 0, 3);
 				while(Button.DOWN.isDown()) {/*wait*/}
 			}
 			if(button == Button.ID_ESCAPE) {
